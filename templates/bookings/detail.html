@@ -1,0 +1,165 @@
+{% extends 'base.html' %}
+{% load humanize %}
+
+{% block title %}Reservation {{ booking.booking_id }} - ApnaStay{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-9">
+
+            <div class="d-flex align-items-center justify-content-between mb-4">
+                <div>
+                    {% if is_host %}
+                        <a href="{% url 'accounts:host_dashboard' %}" class="small text-muted text-decoration-none">
+                            <i class="bi bi-arrow-left me-1"></i> Back to Host Dashboard
+                        </a>
+                    {% else %}
+                        <a href="{% url 'accounts:guest_dashboard' %}" class="small text-muted text-decoration-none">
+                            <i class="bi bi-arrow-left me-1"></i> Back to My Bookings
+                        </a>
+                    {% endif %}
+                    <h2 class="fw-bold mt-2">Reservation Details</h2>
+                </div>
+
+                <div>
+                    {% if booking.status == 'confirmed' %}
+                        <span class="badge bg-success fs-6 px-3 py-2">Confirmed</span>
+                    {% elif booking.status == 'cancelled' %}
+                        <span class="badge bg-danger fs-6 px-3 py-2">Cancelled</span>
+                    {% elif booking.status == 'completed' %}
+                        <span class="badge bg-secondary fs-6 px-3 py-2">Completed</span>
+                    {% else %}
+                        <span class="badge bg-warning fs-6 px-3 py-2">{{ booking.get_status_display }}</span>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Booking Card Receipt -->
+            <div class="card border-0 shadow-sm rounded-4 p-4 p-md-5 bg-white mb-4">
+                <div class="d-flex justify-content-between align-items-center pb-4 mb-4 border-bottom">
+                    <div>
+                        <span class="text-muted small">Booking Reference</span>
+                        <h4 class="fw-bold font-monospace mb-0 text-coral">{{ booking.booking_id }}</h4>
+                    </div>
+                    <div class="text-end">
+                        <span class="text-muted small">Booked On</span>
+                        <div class="fw-semibold">{{ booking.created_at|date:"d M Y, h:i A" }}</div>
+                    </div>
+                </div>
+
+                <!-- Property Info -->
+                <div class="row g-4 mb-4 pb-4 border-bottom">
+                    <div class="col-md-3">
+                        {% if booking.listing.cover_image and booking.listing.cover_image.image %}
+                            <img src="{{ booking.listing.cover_image.image.url }}" class="rounded-3 w-100 shadow-sm" style="height: 120px; object-fit: cover;">
+                        {% else %}
+                            <img src="https://images.unsplash.com/photo-1566073771259-6a8506099945?w=300" class="rounded-3 w-100 shadow-sm" style="height: 120px; object-fit: cover;">
+                        {% endif %}
+                    </div>
+                    <div class="col-md-9">
+                        <h5 class="fw-bold mb-1">
+                            <a href="{% url 'listings:detail' slug=booking.listing.slug %}" class="text-dark text-decoration-none">
+                                {{ booking.listing.title }}
+                            </a>
+                        </h5>
+                        <div class="text-muted small mb-2"><i class="bi bi-geo-alt"></i> {{ booking.listing.address }}, {{ booking.listing.city }}, {{ booking.listing.state }}</div>
+                        <div class="small">
+                            <strong>Host:</strong> {{ booking.listing.host.full_name }} ({{ booking.listing.host.email }}{% if booking.listing.host.phone_number %} · {{ booking.listing.host.phone_number }}{% endif %})
+                        </div>
+                        <div class="small mt-1">
+                            <strong>Guest:</strong> {{ booking.guest.full_name }} ({{ booking.guest.email }}{% if booking.guest.phone_number %} · {{ booking.guest.phone_number }}{% endif %})
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Stay Details Grid -->
+                <div class="row g-3 mb-4 pb-4 border-bottom">
+                    <div class="col-6 col-md-3">
+                        <span class="text-muted small d-block">Check-in</span>
+                        <strong class="fs-6">{{ booking.check_in|date:"D, d M Y" }}</strong>
+                    </div>
+                    <div class="col-6 col-md-3">
+                        <span class="text-muted small d-block">Check-out</span>
+                        <strong class="fs-6">{{ booking.check_out|date:"D, d M Y" }}</strong>
+                    </div>
+                    <div class="col-6 col-md-3">
+                        <span class="text-muted small d-block">Total Stay Duration</span>
+                        <strong class="fs-6">{{ booking.total_nights }} night{{ booking.total_nights|pluralize }}</strong>
+                    </div>
+                    <div class="col-6 col-md-3">
+                        <span class="text-muted small d-block">Guests Travelling</span>
+                        <strong class="fs-6">{{ booking.guests_count }} guest{{ booking.guests_count|pluralize }}</strong>
+                    </div>
+                </div>
+
+                <!-- Financial Breakdown -->
+                <h6 class="fw-bold mb-3">Billing Summary</h6>
+                <div class="price-breakdown-row">
+                    <span>₹{{ booking.price_per_night|floatformat:0|intcomma }} × {{ booking.total_nights }} night{{ booking.total_nights|pluralize }}</span>
+                    <span>₹{{ booking.subtotal|floatformat:0|intcomma }}</span>
+                </div>
+                {% if booking.cleaning_fee > 0 %}
+                <div class="price-breakdown-row">
+                    <span>Cleaning Fee</span>
+                    <span>₹{{ booking.cleaning_fee|floatformat:0|intcomma }}</span>
+                </div>
+                {% endif %}
+                <div class="price-breakdown-row">
+                    <span>ApnaStay Service Fee</span>
+                    <span>₹{{ booking.service_fee|floatformat:0|intcomma }}</span>
+                </div>
+                <div class="price-breakdown-total">
+                    <span>Total Amount (INR)</span>
+                    <span>₹{{ booking.total_amount|floatformat:0|intcomma }}</span>
+                </div>
+                <div class="text-muted small mt-2">
+                    Payment Method: <strong>{{ booking.get_payment_status_display }}</strong>
+                </div>
+
+                {% if booking.special_requests %}
+                <div class="mt-4 p-3 bg-light rounded-3">
+                    <span class="fw-bold small d-block text-dark">Special Requests:</span>
+                    <span class="small text-muted">{{ booking.special_requests }}</span>
+                </div>
+                {% endif %}
+
+                {% if booking.cancellation_reason %}
+                <div class="mt-4 p-3 bg-danger-subtle rounded-3 text-danger">
+                    <span class="fw-bold small d-block">Cancellation Note:</span>
+                    <span class="small">{{ booking.cancellation_reason }} (on {{ booking.cancelled_at|date:"d M Y, h:i A" }})</span>
+                </div>
+                {% endif %}
+
+                <!-- Actions -->
+                <div class="d-flex flex-wrap justify-content-between align-items-center mt-5 pt-3 border-top">
+                    <div>
+                        <button type="button" class="btn btn-outline-secondary btn-sm px-3" onclick="window.print();">
+                            <i class="bi bi-printer me-1"></i> Print Receipt
+                        </button>
+                    </div>
+
+                    <div class="d-flex gap-2">
+                        {% if booking.can_cancel %}
+                            <form method="POST" action="{% url 'bookings:cancel' booking_id=booking.booking_id %}" onsubmit="return confirm('Confirm cancellation of this reservation?');">
+                                {% csrf_token %}
+                                <button type="submit" class="btn btn-outline-danger btn-sm px-3">
+                                    <i class="bi bi-x-circle me-1"></i> Cancel Booking
+                                </button>
+                            </form>
+                        {% endif %}
+
+                        {% if booking.can_review and not is_host %}
+                            <a href="{% url 'reviews:create' booking_id=booking.booking_id %}" class="btn btn-coral btn-sm px-3">
+                                <i class="bi bi-star me-1"></i> Write Review
+                            </a>
+                        {% endif %}
+                    </div>
+                </div>
+
+            </div>
+
+        </div>
+    </div>
+</div>
+{% endblock %}

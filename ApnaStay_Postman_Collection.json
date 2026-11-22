@@ -1,0 +1,321 @@
+{
+  "info": {
+    "name": "ApnaStay REST API Collection",
+    "_postman_id": "b6a823f1-4f12-4c8d-93cb-9860b7194f26",
+    "description": "Comprehensive Postman test collection for ApnaStay - Full-Stack Airbnb-Inspired Accommodation Platform (Django REST Framework).",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "base_url",
+      "value": "http://127.0.0.1:8000",
+      "type": "string"
+    },
+    {
+      "key": "auth_token",
+      "value": "",
+      "type": "string"
+    }
+  ],
+  "item": [
+    {
+      "name": "Authentication",
+      "item": [
+        {
+          "name": "1. User Register",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"username\": \"postman_guest\",\n    \"email\": \"postman_guest@example.com\",\n    \"first_name\": \"Postman\",\n    \"last_name\": \"Guest\",\n    \"password\": \"TestPass123!\",\n    \"confirm_password\": \"TestPass123!\",\n    \"is_host\": false\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/auth/register/",
+              "host": ["{{base_url}}"],
+              "path": ["api", "auth", "register", ""]
+            }
+          }
+        },
+        {
+          "name": "2. User Login",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "var jsonData = pm.response.json();",
+                  "if (jsonData.token) {",
+                  "    pm.collectionVariables.set('auth_token', jsonData.token);",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"username\": \"guest1\",\n    \"password\": \"guest123\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/auth/login/",
+              "host": ["{{base_url}}"],
+              "path": ["api", "auth", "login", ""]
+            }
+          }
+        },
+        {
+          "name": "3. Get User Profile",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Token {{auth_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/auth/profile/",
+              "host": ["{{base_url}}"],
+              "path": ["api", "auth", "profile", ""]
+            }
+          }
+        },
+        {
+          "name": "4. User Logout",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Token {{auth_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/auth/logout/",
+              "host": ["{{base_url}}"],
+              "path": ["api", "auth", "logout", ""]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Listings",
+      "item": [
+        {
+          "name": "1. List All Properties",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{base_url}}/api/listings/",
+              "host": ["{{base_url}}"],
+              "path": ["api", "listings", ""]
+            }
+          }
+        },
+        {
+          "name": "2. Search & Filter Properties",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{base_url}}/api/listings/?city=Goa&category=villa&min_price=5000&max_price=20000",
+              "host": ["{{base_url}}"],
+              "path": ["api", "listings", ""],
+              "query": [
+                { "key": "city", "value": "Goa" },
+                { "key": "category", "value": "villa" },
+                { "key": "min_price", "value": "5000" },
+                { "key": "max_price", "value": "20000" }
+              ]
+            }
+          }
+        },
+        {
+          "name": "3. Get Listing Detail",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{base_url}}/api/listings/1/",
+              "host": ["{{base_url}}"],
+              "path": ["api", "listings", "1", ""]
+            }
+          }
+        },
+        {
+          "name": "4. Create New Listing (Host)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Token {{auth_token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"title\": \"Panoramic Oceanfront Bungalow\",\n    \"description\": \"A serene bungalow overlooking the Arabian Sea with private garden.\",\n    \"property_type\": \"villa\",\n    \"address\": \"Vagator Cliff Rd\",\n    \"city\": \"North Goa\",\n    \"state\": \"Goa\",\n    \"country\": \"India\",\n    \"price_per_night\": \"12000.00\",\n    \"cleaning_fee\": \"1000.00\",\n    \"max_guests\": 6,\n    \"bedrooms\": 3,\n    \"beds\": 3,\n    \"bathrooms\": 3,\n    \"is_active\": true\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/listings/",
+              "host": ["{{base_url}}"],
+              "path": ["api", "listings", ""]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Bookings",
+      "item": [
+        {
+          "name": "1. List Bookings",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Token {{auth_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/bookings/",
+              "host": ["{{base_url}}"],
+              "path": ["api", "bookings", ""]
+            }
+          }
+        },
+        {
+          "name": "2. Create Booking",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Token {{auth_token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"listing\": 1,\n    \"check_in\": \"2026-12-10\",\n    \"check_out\": \"2026-12-14\",\n    \"guests_count\": 2,\n    \"special_requests\": \"Ground floor room preferred.\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/bookings/",
+              "host": ["{{base_url}}"],
+              "path": ["api", "bookings", ""]
+            }
+          }
+        },
+        {
+          "name": "3. Cancel Booking",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Token {{auth_token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"reason\": \"Schedule change.\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/bookings/1/cancel/",
+              "host": ["{{base_url}}"],
+              "path": ["api", "bookings", "1", "cancel", ""]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Wishlist",
+      "item": [
+        {
+          "name": "1. View User Wishlist",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Token {{auth_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/wishlist/",
+              "host": ["{{base_url}}"],
+              "path": ["api", "wishlist", ""]
+            }
+          }
+        },
+        {
+          "name": "2. Add to Wishlist",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Token {{auth_token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"listing_id\": 2\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/wishlist/",
+              "host": ["{{base_url}}"],
+              "path": ["api", "wishlist", ""]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "System Health",
+      "item": [
+        {
+          "name": "1. Health Check (DB & Server)",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{base_url}}/health/",
+              "host": ["{{base_url}}"],
+              "path": ["health", ""]
+            }
+          }
+        }
+      ]
+    }
+  ]
+}

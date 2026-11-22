@@ -1,0 +1,323 @@
+{% extends 'base.html' %}
+{% load static humanize %}
+
+{% block title %}ApnaStay - Find your perfect stay, anywhere{% endblock %}
+
+{% block content %}
+<!-- 1. HERO SECTION & INTEGRATED SEARCH BAR -->
+<section class="hero-wrapper">
+    <div class="container text-center">
+        <h1 class="hero-title mb-3">Find your perfect stay, anywhere.</h1>
+        <p class="hero-subtitle mb-4 mx-auto" style="max-width: 650px;">
+            Explore handcrafted villas, serene cottages, scenic homestays, and unique getaways across India.
+        </p>
+
+        <!-- Search Bar Widget -->
+        <div class="row justify-content-center">
+            <div class="col-12 col-xl-10">
+                <form action="{% url 'listings:list' %}" method="GET" class="hero-search-card">
+                    <div class="row g-0 w-100 align-items-center">
+
+                        <!-- Destination Input -->
+                        <div class="col-12 col-md-4 search-input-col text-start">
+                            <label class="search-label"><i class="bi bi-geo-alt me-1"></i> Destination</label>
+                            <input type="text" name="destination" class="search-field" placeholder="Where to? (e.g. Goa, Manali, Jaipur)" autocomplete="off">
+                        </div>
+
+                        <!-- Check-in Date -->
+                        <div class="col-6 col-md-2 search-input-col text-start">
+                            <label class="search-label"><i class="bi bi-calendar-event me-1"></i> Check in</label>
+                            <input type="date" name="check_in" class="search-field" min="{% now 'Y-m-d' %}">
+                        </div>
+
+                        <!-- Check-out Date -->
+                        <div class="col-6 col-md-2 search-input-col text-start">
+                            <label class="search-label"><i class="bi bi-calendar-check me-1"></i> Check out</label>
+                            <input type="date" name="check_out" class="search-field" min="{% now 'Y-m-d' %}">
+                        </div>
+
+                        <!-- Guests Count -->
+                        <div class="col-8 col-md-2 search-input-col text-start">
+                            <label class="search-label"><i class="bi bi-people me-1"></i> Guests</label>
+                            <select name="guests" class="search-field">
+                                <option value="1">1 Guest</option>
+                                <option value="2">2 Guests</option>
+                                <option value="3">3 Guests</option>
+                                <option value="4">4 Guests</option>
+                                <option value="6">6+ Guests</option>
+                            </select>
+                        </div>
+
+                        <!-- Search Submit Button -->
+                        <div class="col-4 col-md-2 p-1 text-end">
+                            <button type="submit" class="btn btn-coral w-100 py-2 d-flex align-items-center justify-content-center gap-2">
+                                <i class="bi bi-search"></i>
+                                <span class="d-none d-sm-inline">Search</span>
+                            </button>
+                        </div>
+
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- 2. PROPERTY CATEGORIES SCROLLER -->
+<div class="border-bottom bg-white">
+    <div class="container-fluid px-lg-5">
+        <div class="category-scroller">
+            {% for cat in PROPERTY_CATEGORIES %}
+            <a href="{% url 'listings:list' %}?category={{ cat.code }}" class="category-pill {% if request.GET.category == cat.code %}active{% endif %}">
+                <i class="bi {{ cat.icon }}"></i>
+                <span>{{ cat.name }}</span>
+            </a>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+
+<div class="container-fluid px-lg-5 py-5">
+
+    <!-- 3. FEATURED LISTINGS -->
+    <div class="mb-5">
+        <div class="d-flex align-items-end justify-content-between mb-4">
+            <div>
+                <h3 class="mb-1">Featured Stays in India</h3>
+                <p class="text-muted mb-0">Handpicked properties with outstanding hospitality, design, and verified reviews.</p>
+            </div>
+            <a href="{% url 'listings:list' %}" class="fw-semibold text-decoration-none text-coral">
+                View all stays <i class="bi bi-arrow-right"></i>
+            </a>
+        </div>
+
+        {% if featured_listings %}
+        <div class="row g-4">
+            {% for listing in featured_listings %}
+            <div class="col-12 col-sm-6 col-lg-4 col-xl-4">
+                <div class="property-card h-100">
+                    <div class="property-img-wrapper">
+                        {% if listing.cover_image and listing.cover_image.image %}
+                            <img src="{{ listing.cover_image.image.url }}" alt="{{ listing.title }}" class="property-img" loading="lazy">
+                        {% else %}
+                            <img src="https://images.unsplash.com/photo-1566073771259-6a8506099945?w=700" alt="{{ listing.title }}" class="property-img" loading="lazy">
+                        {% endif %}
+
+                        <!-- Wishlist Heart Button -->
+                        <button class="wishlist-heart-btn wishlist-toggle-btn {% if listing.id in user_wishlist_ids %}active{% endif %}"
+                                data-listing-id="{{ listing.id }}" title="Save to Wishlist">
+                            <i class="bi {% if listing.id in user_wishlist_ids %}bi-heart-fill{% else %}bi-heart{% endif %}"></i>
+                        </button>
+
+                        <span class="property-badge-type">{{ listing.get_property_type_display }}</span>
+                    </div>
+
+                    <a href="{% url 'listings:detail' slug=listing.slug %}" class="text-decoration-none">
+                        <div class="d-flex justify-content-between align-items-baseline">
+                            <h5 class="property-title text-truncate me-2" title="{{ listing.title }}">{{ listing.title }}</h5>
+                            <div class="property-rating">
+                                <i class="bi bi-star-fill"></i>
+                                <span>{% if listing.average_rating > 0 %}{{ listing.average_rating }}{% else %}New{% endif %}</span>
+                            </div>
+                        </div>
+                        <div class="property-location">{{ listing.city }}, {{ listing.state }}</div>
+                        <div class="text-muted small mb-2">{{ listing.max_guests }} guests · {{ listing.bedrooms }} bed{% if listing.bedrooms > 1 %}s{% endif %} · {{ listing.bathrooms }} bath{% if listing.bathrooms > 1 %}s{% endif %}</div>
+                        <div class="property-price">
+                            ₹{{ listing.price_per_night|floatformat:0|intcomma }} <span class="price-subtext">/ night</span>
+                        </div>
+                    </a>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        {% else %}
+        <div class="text-center py-5 bg-light rounded-4">
+            <i class="bi bi-house-slash fs-1 text-muted mb-3 d-block"></i>
+            <h5>No properties listed yet</h5>
+            <p class="text-muted">Populate the demo database to view featured accommodations.</p>
+        </div>
+        {% endif %}
+    </div>
+
+    <!-- 4. POPULAR DESTINATIONS -->
+    <div class="my-5 py-3">
+        <h3 class="mb-1">Explore Popular Indian Destinations</h3>
+        <p class="text-muted mb-4">From tropical beaches to misty mountain peaks, find the destination of your dreams.</p>
+
+        <div class="row g-4">
+            {% for dest in popular_destinations %}
+            <div class="col-6 col-md-4 col-lg-2">
+                <a href="{% url 'listings:list' %}?destination={{ dest.name }}" class="text-decoration-none">
+                    <div class="dest-card">
+                        <img src="{{ dest.image }}" alt="{{ dest.name }}" class="dest-img" loading="lazy">
+                        <div class="dest-overlay">
+                            <div class="dest-name">{{ dest.name }}</div>
+                            <div class="dest-count">{{ dest.count }} stay{% if dest.count != 1 %}s{% endif %}</div>
+                        </div>
+                    </div>
+                </a>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+
+    <!-- 5. RECENTLY ADDED PROPERTIES -->
+    {% if recent_listings %}
+    <div class="my-5">
+        <div class="d-flex align-items-end justify-content-between mb-4">
+            <div>
+                <h3 class="mb-1">Recently Added Accommodations</h3>
+                <p class="text-muted mb-0">Freshly listed homes, retreats, and estates ready for your upcoming trips.</p>
+            </div>
+            <a href="{% url 'listings:list' %}?sort=newest" class="fw-semibold text-decoration-none text-coral">
+                Browse latest <i class="bi bi-arrow-right"></i>
+            </a>
+        </div>
+
+        <div class="row g-4">
+            {% for listing in recent_listings %}
+            <div class="col-12 col-sm-6 col-lg-4 col-xl-4">
+                <div class="property-card h-100">
+                    <div class="property-img-wrapper">
+                        {% if listing.cover_image and listing.cover_image.image %}
+                            <img src="{{ listing.cover_image.image.url }}" alt="{{ listing.title }}" class="property-img" loading="lazy">
+                        {% else %}
+                            <img src="https://images.unsplash.com/photo-1542314831-068cd1dbfeeb?w=700" alt="{{ listing.title }}" class="property-img" loading="lazy">
+                        {% endif %}
+
+                        <button class="wishlist-heart-btn wishlist-toggle-btn {% if listing.id in user_wishlist_ids %}active{% endif %}"
+                                data-listing-id="{{ listing.id }}" title="Save to Wishlist">
+                            <i class="bi {% if listing.id in user_wishlist_ids %}bi-heart-fill{% else %}bi-heart{% endif %}"></i>
+                        </button>
+
+                        <span class="property-badge-type">{{ listing.get_property_type_display }}</span>
+                    </div>
+
+                    <a href="{% url 'listings:detail' slug=listing.slug %}" class="text-decoration-none">
+                        <div class="d-flex justify-content-between align-items-baseline">
+                            <h5 class="property-title text-truncate me-2" title="{{ listing.title }}">{{ listing.title }}</h5>
+                            <div class="property-rating">
+                                <i class="bi bi-star-fill"></i>
+                                <span>{% if listing.average_rating > 0 %}{{ listing.average_rating }}{% else %}New{% endif %}</span>
+                            </div>
+                        </div>
+                        <div class="property-location">{{ listing.city }}, {{ listing.state }}</div>
+                        <div class="property-price">
+                            ₹{{ listing.price_per_night|floatformat:0|intcomma }} <span class="price-subtext">/ night</span>
+                        </div>
+                    </a>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- 6. BECOME A HOST PROMOTIONAL BANNER -->
+    <div class="my-5 py-4">
+        <div class="p-5 rounded-4 position-relative overflow-hidden" style="background: linear-gradient(135deg, #1A1A1A 0%, #2D2D2D 100%); color: white;">
+            <div class="row align-items-center">
+                <div class="col-lg-7">
+                    <span class="badge bg-danger mb-3 px-3 py-2 text-uppercase">Earn with ApnaStay</span>
+                    <h2 class="display-6 fw-bold mb-3 text-white">Turn your home or extra space into a high-earning stay.</h2>
+                    <p class="lead opacity-75 mb-4">
+                        Join hundreds of property owners across India. List your apartment, villa, or farmhouse, welcome wonderful guests, and enjoy protected bookings.
+                    </p>
+                    <div class="d-flex flex-wrap gap-3">
+                        <a href="{% url 'accounts:become_host' %}" class="btn btn-coral px-4 py-2 fs-6">
+                            Start Hosting Today
+                        </a>
+                        <a href="{% url 'core:help' %}" class="btn btn-outline-light px-4 py-2 fs-6">
+                            Learn How It Works
+                        </a>
+                    </div>
+                </div>
+                <div class="col-lg-5 d-none d-lg-block text-center">
+                    <i class="bi bi-houses-fill display-1 text-danger opacity-75"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 7. WHY CHOOSE APNASTAY -->
+    <div class="my-5 py-4">
+        <div class="text-center mb-5">
+            <h3 class="mb-2">Why Travellers & Hosts Choose ApnaStay</h3>
+            <p class="text-muted mx-auto" style="max-width: 600px;">
+                Designed specifically for the Indian travel ecosystem with clear pricing, verified listings, and friendly customer support.
+            </p>
+        </div>
+
+        <div class="row g-4 text-center">
+            <div class="col-md-4">
+                <div class="p-4 rounded-4 bg-light h-100">
+                    <div class="stat-icon-wrapper mx-auto mb-3">
+                        <i class="bi bi-shield-check"></i>
+                    </div>
+                    <h5 class="fw-bold mb-2">Verified Accommodations</h5>
+                    <p class="text-muted small mb-0">Every property goes through strict quality checks, authentic photography, and accurate amenity verification.</p>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="p-4 rounded-4 bg-light h-100">
+                    <div class="stat-icon-wrapper mx-auto mb-3">
+                        <i class="bi bi-cash-stack"></i>
+                    </div>
+                    <h5 class="fw-bold mb-2">Transparent Pricing</h5>
+                    <p class="text-muted small mb-0">No hidden surprises at checkout. Complete price breakdowns including nights, cleaning fees, and service charges.</p>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="p-4 rounded-4 bg-light h-100">
+                    <div class="stat-icon-wrapper mx-auto mb-3">
+                        <i class="bi bi-headset"></i>
+                    </div>
+                    <h5 class="fw-bold mb-2">24/7 Dedicated Support</h5>
+                    <p class="text-muted small mb-0">Our local customer support team is always available to resolve queries, assist with re-bookings, and help hosts.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 8. CUSTOMER TESTIMONIALS -->
+    {% if testimonials %}
+    <div class="my-5 py-4">
+        <div class="text-center mb-4">
+            <h3 class="mb-1">Loved by Travellers Across India</h3>
+            <p class="text-muted">Real guest reviews from verified stays booked on ApnaStay.</p>
+        </div>
+
+        <div class="row g-4">
+            {% for t in testimonials %}
+            <div class="col-12 col-md-6 col-lg-3">
+                <div class="p-4 rounded-4 border bg-white h-100 d-flex flex-direction-column justify-content-between">
+                    <div>
+                        <div class="text-warning mb-2">
+                            {% for i in "12345"|make_list %}
+                                {% if forloop.counter <= t.rating %}
+                                    <i class="bi bi-star-fill"></i>
+                                {% else %}
+                                    <i class="bi bi-star"></i>
+                                {% endif %}
+                            {% endfor %}
+                        </div>
+                        <p class="text-dark small mb-3 fst-italic">"{{ t.comment|truncatewords:24 }}"</p>
+                    </div>
+                    <div class="d-flex align-items-center gap-2 pt-2 border-top">
+                        <div class="user-avatar-small bg-primary text-white d-flex align-items-center justify-content-center fw-bold">
+                            {{ t.user.first_name|first|default:t.user.username|first|upper }}
+                        </div>
+                        <div>
+                            <div class="fw-bold small">{{ t.user.full_name }}</div>
+                            <div class="text-muted" style="font-size: 0.75rem;">Stayed at {{ t.listing.city }}</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+    {% endif %}
+
+</div>
+{% endblock %}

@@ -1,0 +1,256 @@
+{% extends 'base.html' %}
+{% load humanize %}
+
+{% block title %}My Trips & Bookings - ApnaStay{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+
+    <!-- Header & User Info -->
+    <div class="d-flex flex-column flex-md-row align-items-md-center justify-content-between mb-4 pb-3 border-bottom">
+        <div class="d-flex align-items-center gap-3">
+            {% if user.avatar_url %}
+                <img src="{{ user.avatar_url }}" alt="{{ user.username }}" class="rounded-circle shadow-sm" style="width: 65px; height: 65px; object-fit: cover;">
+            {% else %}
+                <div class="rounded-circle bg-secondary text-white d-flex align-items-center justify-content-center fs-2 shadow-sm" style="width: 65px; height: 65px;">
+                    <i class="bi bi-person"></i>
+                </div>
+            {% endif %}
+            <div>
+                <h2 class="fw-bold mb-0">Hello, {{ user.first_name|default:user.username }}!</h2>
+                <span class="text-muted small">Member since {{ user.date_joined|date:"F Y" }}</span>
+            </div>
+        </div>
+        <div class="mt-3 mt-md-0 d-flex gap-2">
+            <a href="{% url 'accounts:profile' %}" class="btn btn-sm btn-outline-dark rounded-pill px-3">
+                <i class="bi bi-pencil me-1"></i> Edit Profile
+            </a>
+            {% if user.is_host %}
+                <a href="{% url 'accounts:host_dashboard' %}" class="btn btn-sm btn-coral rounded-pill px-3">
+                    <i class="bi bi-speedometer2 me-1"></i> Host Dashboard
+                </a>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Quick Stats Summary Cards -->
+    <div class="row g-3 mb-5">
+        <div class="col-6 col-md-3">
+            <div class="stat-card">
+                <div class="d-flex align-items-center justify-content-between">
+                    <div>
+                        <div class="text-muted small">Total Bookings</div>
+                        <h3 class="fw-bold mb-0">{{ total_bookings }}</h3>
+                    </div>
+                    <div class="stat-icon-wrapper">
+                        <i class="bi bi-briefcase"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-6 col-md-3">
+            <div class="stat-card">
+                <div class="d-flex align-items-center justify-content-between">
+                    <div>
+                        <div class="text-muted small">Upcoming Trips</div>
+                        <h3 class="fw-bold mb-0">{{ upcoming_bookings.count }}</h3>
+                    </div>
+                    <div class="stat-icon-wrapper">
+                        <i class="bi bi-calendar-check"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-6 col-md-3">
+            <div class="stat-card">
+                <div class="d-flex align-items-center justify-content-between">
+                    <div>
+                        <div class="text-muted small">Saved Stays</div>
+                        <h3 class="fw-bold mb-0">{{ wishlist_items.count }}</h3>
+                    </div>
+                    <div class="stat-icon-wrapper">
+                        <i class="bi bi-heart"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-6 col-md-3">
+            <div class="stat-card">
+                <div class="d-flex align-items-center justify-content-between">
+                    <div>
+                        <div class="text-muted small">Reviews Given</div>
+                        <h3 class="fw-bold mb-0">{{ user_reviews.count }}</h3>
+                    </div>
+                    <div class="stat-icon-wrapper">
+                        <i class="bi bi-star"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Tabbed Navigation: Upcoming, Completed, Cancelled -->
+    <ul class="nav nav-pills mb-4 gap-2" id="bookingTabs" role="tablist">
+        <li class="nav-item">
+            <button class="nav-link active rounded-pill px-4 fw-semibold" id="upcoming-tab" data-bs-toggle="pill" data-bs-target="#upcoming" type="button">
+                Upcoming Stays ({{ upcoming_bookings.count }})
+            </button>
+        </li>
+        <li class="nav-item">
+            <button class="nav-link rounded-pill px-4 fw-semibold" id="completed-tab" data-bs-toggle="pill" data-bs-target="#completed" type="button">
+                Past Stays ({{ completed_bookings.count }})
+            </button>
+        </li>
+        <li class="nav-item">
+            <button class="nav-link rounded-pill px-4 fw-semibold" id="cancelled-tab" data-bs-toggle="pill" data-bs-target="#cancelled" type="button">
+                Cancelled ({{ cancelled_bookings.count }})
+            </button>
+        </li>
+    </ul>
+
+    <div class="tab-content" id="bookingTabsContent">
+
+        <!-- UPCOMING BOOKINGS TAB -->
+        <div class="tab-pane fade show active" id="upcoming" role="tabpanel">
+            {% if upcoming_bookings %}
+                <div class="row g-4">
+                    {% for b in upcoming_bookings %}
+                    <div class="col-12 col-md-6 col-lg-4">
+                        <div class="card border-0 shadow-sm rounded-4 overflow-hidden h-100">
+                            {% if b.listing.cover_image and b.listing.cover_image.image %}
+                                <img src="{{ b.listing.cover_image.image.url }}" class="card-img-top" style="height: 180px; object-fit: cover;">
+                            {% else %}
+                                <img src="https://images.unsplash.com/photo-1566073771259-6a8506099945?w=500" class="card-img-top" style="height: 180px; object-fit: cover;">
+                            {% endif %}
+                            <div class="card-body p-4 d-flex flex-column justify-content-between">
+                                <div>
+                                    <div class="d-flex justify-content-between align-items-center mb-2">
+                                        <span class="badge bg-success-subtle text-success text-uppercase">{{ b.get_status_display }}</span>
+                                        <span class="text-muted small">Ref: <strong>{{ b.booking_id }}</strong></span>
+                                    </div>
+                                    <h5 class="fw-bold mb-1">{{ b.listing.title }}</h5>
+                                    <div class="text-muted small mb-3"><i class="bi bi-geo-alt"></i> {{ b.listing.city }}, {{ b.listing.state }}</div>
+
+                                    <div class="p-3 bg-light rounded-3 mb-3">
+                                        <div class="d-flex justify-content-between small text-muted mb-1">
+                                            <span>Check-in:</span>
+                                            <strong class="text-dark">{{ b.check_in|date:"D, d M Y" }}</strong>
+                                        </div>
+                                        <div class="d-flex justify-content-between small text-muted mb-1">
+                                            <span>Check-out:</span>
+                                            <strong class="text-dark">{{ b.check_out|date:"D, d M Y" }}</strong>
+                                        </div>
+                                        <div class="d-flex justify-content-between small text-muted">
+                                            <span>Total Amount:</span>
+                                            <strong class="text-dark fs-6">₹{{ b.total_amount|floatformat:0|intcomma }}</strong>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="d-flex gap-2 pt-2 border-top">
+                                    <a href="{% url 'bookings:detail' booking_id=b.booking_id %}" class="btn btn-outline-dark btn-sm flex-grow-1">
+                                        View Details
+                                    </a>
+                                    {% if b.can_cancel %}
+                                        <form method="POST" action="{% url 'bookings:cancel' booking_id=b.booking_id %}" onsubmit="return confirm('Are you sure you want to cancel this booking?');">
+                                            {% csrf_token %}
+                                            <button type="submit" class="btn btn-outline-danger btn-sm">Cancel</button>
+                                        </form>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            {% else %}
+                <div class="text-center py-5 bg-light rounded-4">
+                    <i class="bi bi-suitcase-lg fs-1 text-muted mb-2 d-block"></i>
+                    <h5 class="fw-bold">No upcoming trips</h5>
+                    <p class="text-muted mb-3">Time to pack your bags and find a new adventure!</p>
+                    <a href="{% url 'listings:list' %}" class="btn btn-coral px-4">Start Searching</a>
+                </div>
+            {% endif %}
+        </div>
+
+        <!-- COMPLETED BOOKINGS TAB -->
+        <div class="tab-pane fade" id="completed" role="tabpanel">
+            {% if completed_bookings %}
+                <div class="row g-4">
+                    {% for b in completed_bookings %}
+                    <div class="col-12 col-md-6 col-lg-4">
+                        <div class="card border-0 shadow-sm rounded-4 overflow-hidden h-100">
+                            {% if b.listing.cover_image and b.listing.cover_image.image %}
+                                <img src="{{ b.listing.cover_image.image.url }}" class="card-img-top" style="height: 180px; object-fit: cover;">
+                            {% else %}
+                                <img src="https://images.unsplash.com/photo-1566073771259-6a8506099945?w=500" class="card-img-top" style="height: 180px; object-fit: cover;">
+                            {% endif %}
+                            <div class="card-body p-4 d-flex flex-column justify-content-between">
+                                <div>
+                                    <div class="d-flex justify-content-between align-items-center mb-2">
+                                        <span class="badge bg-secondary-subtle text-secondary">Completed</span>
+                                        <span class="text-muted small">{{ b.booking_id }}</span>
+                                    </div>
+                                    <h5 class="fw-bold mb-1">{{ b.listing.title }}</h5>
+                                    <div class="text-muted small mb-2">{{ b.listing.city }}, {{ b.listing.state }}</div>
+                                    <div class="small text-muted mb-3">{{ b.check_in|date:"d M" }} – {{ b.check_out|date:"d M Y" }} ({{ b.total_nights }} nights)</div>
+                                </div>
+
+                                <div class="pt-2 border-top">
+                                    {% if b.review %}
+                                        <div class="d-flex justify-content-between align-items-center">
+                                            <span class="badge bg-warning-subtle text-dark">
+                                                <i class="bi bi-star-fill text-warning"></i> {{ b.review.rating }}/5 Rated
+                                            </span>
+                                            <a href="{% url 'reviews:edit' review_id=b.review.id %}" class="small text-muted">Edit Review</a>
+                                        </div>
+                                    {% else %}
+                                        <a href="{% url 'reviews:create' booking_id=b.booking_id %}" class="btn btn-outline-coral btn-sm w-100">
+                                            <i class="bi bi-star me-1"></i> Write a Review
+                                        </a>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            {% else %}
+                <div class="text-center py-5 bg-light rounded-4">
+                    <p class="text-muted mb-0">No past stays completed yet.</p>
+                </div>
+            {% endif %}
+        </div>
+
+        <!-- CANCELLED BOOKINGS TAB -->
+        <div class="tab-pane fade" id="cancelled" role="tabpanel">
+            {% if cancelled_bookings %}
+                <div class="row g-4">
+                    {% for b in cancelled_bookings %}
+                    <div class="col-12 col-md-6 col-lg-4">
+                        <div class="card border-0 shadow-sm rounded-4 p-4 h-100 bg-light">
+                            <div class="d-flex justify-content-between align-items-center mb-2">
+                                <span class="badge bg-danger-subtle text-danger">Cancelled</span>
+                                <span class="text-muted small">{{ b.booking_id }}</span>
+                            </div>
+                            <h6 class="fw-bold mb-1">{{ b.listing.title }}</h6>
+                            <div class="text-muted small mb-2">{{ b.listing.city }}</div>
+                            <div class="small text-muted mb-2">Dates: {{ b.check_in|date:"d M Y" }} – {{ b.check_out|date:"d M Y" }}</div>
+                            {% if b.cancellation_reason %}
+                                <div class="small text-danger fst-italic">Reason: {{ b.cancellation_reason }}</div>
+                            {% endif %}
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            {% else %}
+                <div class="text-center py-5 bg-light rounded-4">
+                    <p class="text-muted mb-0">No cancelled bookings.</p>
+                </div>
+            {% endif %}
+        </div>
+
+    </div>
+
+</div>
+{% endblock %}

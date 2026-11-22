@@ -1,0 +1,194 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ title }} - ApnaStay{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-10">
+
+            <div class="d-flex align-items-center justify-content-between mb-4">
+                <div>
+                    <h2 class="fw-bold mb-1">{{ title }}</h2>
+                    <p class="text-muted mb-0">Provide complete details to make your property attractive to guests.</p>
+                </div>
+                <a href="{% url 'accounts:host_dashboard' %}" class="btn btn-outline-dark btn-sm rounded-pill px-3">
+                    <i class="bi bi-arrow-left me-1"></i> Host Dashboard
+                </a>
+            </div>
+
+            <div class="card border-0 shadow-sm rounded-4 p-4 p-md-5 bg-white">
+                <form method="POST" enctype="multipart/form-data" action="">
+                    {% csrf_token %}
+
+                    <!-- SECTION 1: BASIC INFORMATION -->
+                    <h5 class="fw-bold mb-3 text-coral"><i class="bi bi-info-circle me-2"></i> 1. Basic Information</h5>
+                    <div class="row g-3 mb-4">
+                        <div class="col-12">
+                            <label class="form-label fw-semibold">Property Title <span class="text-danger">*</span></label>
+                            {{ form.title }}
+                            <div class="text-muted small">Catchy title highlighting your place (e.g., Luxury Sea View Villa with Private Pool)</div>
+                            {% if form.title.errors %}<div class="text-danger small">{{ form.title.errors }}</div>{% endif %}
+                        </div>
+
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold">Property Category <span class="text-danger">*</span></label>
+                            {{ form.property_type }}
+                            {% if form.property_type.errors %}<div class="text-danger small">{{ form.property_type.errors }}</div>{% endif %}
+                        </div>
+
+                        <div class="col-12">
+                            <label class="form-label fw-semibold">Description <span class="text-danger">*</span></label>
+                            {{ form.description }}
+                            {% if form.description.errors %}<div class="text-danger small">{{ form.description.errors }}</div>{% endif %}
+                        </div>
+                    </div>
+
+                    <!-- SECTION 2: LOCATION -->
+                    <h5 class="fw-bold mb-3 text-coral"><i class="bi bi-geo-alt me-2"></i> 2. Location</h5>
+                    <div class="row g-3 mb-4">
+                        <div class="col-12">
+                            <label class="form-label fw-semibold">Full Address <span class="text-danger">*</span></label>
+                            {{ form.address }}
+                            {% if form.address.errors %}<div class="text-danger small">{{ form.address.errors }}</div>{% endif %}
+                        </div>
+
+                        <div class="col-md-4">
+                            <label class="form-label fw-semibold">City <span class="text-danger">*</span></label>
+                            {{ form.city }}
+                            {% if form.city.errors %}<div class="text-danger small">{{ form.city.errors }}</div>{% endif %}
+                        </div>
+
+                        <div class="col-md-4">
+                            <label class="form-label fw-semibold">State <span class="text-danger">*</span></label>
+                            {{ form.state }}
+                            {% if form.state.errors %}<div class="text-danger small">{{ form.state.errors }}</div>{% endif %}
+                        </div>
+
+                        <div class="col-md-4">
+                            <label class="form-label fw-semibold">Country <span class="text-danger">*</span></label>
+                            {{ form.country }}
+                            {% if form.country.errors %}<div class="text-danger small">{{ form.country.errors }}</div>{% endif %}
+                        </div>
+                    </div>
+
+                    <!-- SECTION 3: CAPACITY & PRICING -->
+                    <h5 class="fw-bold mb-3 text-coral"><i class="bi bi-cash-coin me-2"></i> 3. Capacity & Pricing</h5>
+                    <div class="row g-3 mb-4">
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold">Price per Night (INR) <span class="text-danger">*</span></label>
+                            {{ form.price_per_night }}
+                            {% if form.price_per_night.errors %}<div class="text-danger small">{{ form.price_per_night.errors }}</div>{% endif %}
+                        </div>
+
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold">Cleaning Fee (Optional INR)</label>
+                            {{ form.cleaning_fee }}
+                            {% if form.cleaning_fee.errors %}<div class="text-danger small">{{ form.cleaning_fee.errors }}</div>{% endif %}
+                        </div>
+
+                        <div class="col-6 col-md-3">
+                            <label class="form-label fw-semibold">Max Guests</label>
+                            {{ form.max_guests }}
+                        </div>
+
+                        <div class="col-6 col-md-3">
+                            <label class="form-label fw-semibold">Bedrooms</label>
+                            {{ form.bedrooms }}
+                        </div>
+
+                        <div class="col-6 col-md-3">
+                            <label class="form-label fw-semibold">Beds</label>
+                            {{ form.beds }}
+                        </div>
+
+                        <div class="col-6 col-md-3">
+                            <label class="form-label fw-semibold">Bathrooms</label>
+                            {{ form.bathrooms }}
+                        </div>
+                    </div>
+
+                    <!-- SECTION 4: AMENITIES -->
+                    <h5 class="fw-bold mb-3 text-coral"><i class="bi bi-stars me-2"></i> 4. Amenities Offered</h5>
+                    <div class="p-3 bg-light rounded-4 mb-4">
+                        <div class="row g-2">
+                            {% for pk, choice in form.amenities.field.choices %}
+                            <div class="col-6 col-md-4">
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" name="amenities" value="{{ pk }}" id="amenity_{{ pk }}"
+                                           {% if pk in form.amenities.value %}checked{% endif %}>
+                                    <label class="form-check-label small" for="amenity_{{ pk }}">
+                                        {{ choice }}
+                                    </label>
+                                </div>
+                            </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+
+                    <!-- SECTION 5: PROPERTY PHOTOS -->
+                    <h5 class="fw-bold mb-3 text-coral"><i class="bi bi-images me-2"></i> 5. Property Photos</h5>
+                    <div class="mb-4">
+                        <label class="form-label fw-semibold">Upload Photos</label>
+                        {{ form.images }}
+                        <div class="text-muted small mt-1">Select multiple photos from your device. First photo will be set as cover.</div>
+
+                        <!-- Live Photo Previews -->
+                        <div class="row mt-3" id="image-previews-container"></div>
+                    </div>
+
+                    <!-- Existing photos when editing -->
+                    {% if is_edit and images %}
+                    <div class="mb-4">
+                        <label class="form-label fw-semibold">Current Photos</label>
+                        <div class="row g-3">
+                            {% for img in images %}
+                            <div class="col-6 col-md-3">
+                                <div class="card border rounded-3 overflow-hidden position-relative h-100">
+                                    <img src="{{ img.image.url }}" class="card-img-top" style="height: 120px; object-fit: cover;">
+                                    <div class="p-2 d-flex justify-content-between align-items-center bg-light">
+                                        {% if img.is_cover %}
+                                            <span class="badge bg-success">Cover</span>
+                                        {% else %}
+                                            <button type="submit" formaction="{% url 'listings:set_cover_image' listing_id=listing.id image_id=img.id %}" class="btn btn-sm btn-outline-primary py-0 px-2" style="font-size: 0.75rem;">
+                                                Make Cover
+                                            </button>
+                                        {% endif %}
+
+                                        <button type="submit" formaction="{% url 'listings:delete_image' listing_id=listing.id image_id=img.id %}" class="btn btn-sm btn-outline-danger py-0 px-2" style="font-size: 0.75rem;" onclick="return confirm('Delete this image?');">
+                                            <i class="bi bi-trash"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                    {% endif %}
+
+                    <!-- SECTION 6: VISIBILITY -->
+                    <div class="p-3 bg-light rounded-3 mb-4 d-flex align-items-center justify-content-between">
+                        <div>
+                            <div class="fw-semibold">Listing Status</div>
+                            <div class="small text-muted">When checked, this property is publicly visible in search and explore.</div>
+                        </div>
+                        <div class="form-check form-switch fs-4">
+                            {{ form.is_active }}
+                        </div>
+                    </div>
+
+                    <!-- Submit Buttons -->
+                    <div class="d-flex justify-content-end gap-3 pt-3 border-top">
+                        <a href="{% url 'accounts:host_dashboard' %}" class="btn btn-outline-secondary px-4">Cancel</a>
+                        <button type="submit" class="btn btn-coral px-5 py-2 fs-6 fw-bold">
+                            {% if is_edit %}Save Changes{% else %}Publish Listing{% endif %}
+                        </button>
+                    </div>
+
+                </form>
+            </div>
+
+        </div>
+    </div>
+</div>
+{% endblock %}

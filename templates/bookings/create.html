@@ -1,0 +1,116 @@
+{% extends 'base.html' %}
+{% load humanize %}
+
+{% block title %}Confirm Reservation - {{ listing.title }}{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-10">
+
+            <div class="mb-4">
+                <a href="{% url 'listings:detail' slug=listing.slug %}" class="text-muted small text-decoration-none">
+                    <i class="bi bi-arrow-left me-1"></i> Back to Listing
+                </a>
+                <h2 class="fw-bold mt-2">Confirm and Reserve</h2>
+            </div>
+
+            <div class="row g-5">
+
+                <!-- Left Column: Dates & Guest Form -->
+                <div class="col-lg-7">
+                    <div class="card border-0 shadow-sm rounded-4 p-4 bg-white mb-4">
+                        <h5 class="fw-bold mb-4">Your Trip Details</h5>
+
+                        <form method="POST" action="{% url 'bookings:create' slug=listing.slug %}">
+                            {% csrf_token %}
+
+                            <div class="row g-3 mb-3">
+                                <div class="col-md-6">
+                                    <label class="form-label fw-semibold">Check-in Date <span class="text-danger">*</span></label>
+                                    {{ form.check_in }}
+                                    {% if form.check_in.errors %}<div class="text-danger small mt-1">{{ form.check_in.errors }}</div>{% endif %}
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label fw-semibold">Check-out Date <span class="text-danger">*</span></label>
+                                    {{ form.check_out }}
+                                    {% if form.check_out.errors %}<div class="text-danger small mt-1">{{ form.check_out.errors }}</div>{% endif %}
+                                </div>
+                            </div>
+
+                            <div class="mb-3">
+                                <label class="form-label fw-semibold">Guests Count <span class="text-danger">*</span></label>
+                                {{ form.guests_count }}
+                                <div class="text-muted small">Max capacity: {{ listing.max_guests }} guests</div>
+                                {% if form.guests_count.errors %}<div class="text-danger small mt-1">{{ form.guests_count.errors }}</div>{% endif %}
+                            </div>
+
+                            <div class="mb-4">
+                                <label class="form-label fw-semibold">Special Requests (Optional)</label>
+                                {{ form.special_requests }}
+                            </div>
+
+                            <!-- Payment info note -->
+                            <div class="p-3 bg-light rounded-3 mb-4">
+                                <h6 class="fw-bold mb-1"><i class="bi bi-wallet2 text-coral me-2"></i> Payment Method: Pay at Property</h6>
+                                <p class="text-muted small mb-0">
+                                    No upfront online credit card charge is required today. Payment will be settled directly upon arrival at the accommodation.
+                                </p>
+                            </div>
+
+                            <button type="submit" class="btn btn-coral w-100 py-3 fw-bold fs-6">
+                                Confirm Reservation
+                            </button>
+                        </form>
+                    </div>
+                </div>
+
+                <!-- Right Column: Stay Summary & Price Card -->
+                <div class="col-lg-5">
+                    <div class="card border rounded-4 p-4 shadow-sm bg-white sticky-top" style="top: 100px;">
+                        <div class="d-flex gap-3 mb-4 pb-3 border-bottom">
+                            {% if listing.cover_image and listing.cover_image.image %}
+                                <img src="{{ listing.cover_image.image.url }}" class="rounded-3 shadow-sm" style="width: 100px; height: 100px; object-fit: cover;">
+                            {% else %}
+                                <img src="https://images.unsplash.com/photo-1566073771259-6a8506099945?w=200" class="rounded-3 shadow-sm" style="width: 100px; height: 100px; object-fit: cover;">
+                            {% endif %}
+                            <div>
+                                <span class="badge bg-light text-dark border mb-1">{{ listing.get_property_type_display }}</span>
+                                <h6 class="fw-bold mb-1">{{ listing.title }}</h6>
+                                <div class="text-muted small">{{ listing.city }}, {{ listing.state }}</div>
+                                <div class="small mt-1">
+                                    <i class="bi bi-star-fill text-warning"></i>
+                                    {% if listing.average_rating > 0 %}{{ listing.average_rating }} ({{ listing.review_count }}){% else %}New{% endif %}
+                                </div>
+                            </div>
+                        </div>
+
+                        <h6 class="fw-bold mb-3">Price Details</h6>
+                        <div class="price-breakdown-row">
+                            <span>Base Rate</span>
+                            <span>₹{{ listing.price_per_night|floatformat:0|intcomma }} / night</span>
+                        </div>
+                        {% if listing.cleaning_fee > 0 %}
+                        <div class="price-breakdown-row">
+                            <span>Cleaning Fee</span>
+                            <span>₹{{ listing.cleaning_fee|floatformat:0|intcomma }}</span>
+                        </div>
+                        {% endif %}
+                        <div class="price-breakdown-row">
+                            <span>ApnaStay Service Fee (5%)</span>
+                            <span>Included in total</span>
+                        </div>
+
+                        <div class="p-3 bg-light rounded-3 mt-3">
+                            <i class="bi bi-shield-check text-success me-1"></i>
+                            <span class="small text-muted">Protected under ApnaStay Host & Guest Guarantee</span>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+
+        </div>
+    </div>
+</div>
+{% endblock %}

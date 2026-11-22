@@ -1,0 +1,315 @@
+{% extends 'base.html' %}
+{% load humanize %}
+
+{% block title %}{{ listing.title }} - ApnaStay{% endblock %}
+
+{% block content %}
+<div class="container-fluid px-lg-5 py-4">
+
+    <!-- Title & Top Info Header -->
+    <div class="mb-3">
+        <h2 class="fw-bold mb-2">{{ listing.title }}</h2>
+        <div class="d-flex flex-wrap justify-content-between align-items-center gap-3">
+            <div class="d-flex align-items-center gap-3 small">
+                <span class="fw-bold">
+                    <i class="bi bi-star-fill text-warning"></i>
+                    {% if listing.average_rating > 0 %}{{ listing.average_rating }} · {{ listing.review_count }} review{{ listing.review_count|pluralize }}{% else %}New Property{% endif %}
+                </span>
+                <span>·</span>
+                <span class="text-decoration-underline fw-semibold"><i class="bi bi-geo-alt"></i> {{ listing.address }}, {{ listing.city }}, {{ listing.state }}</span>
+                <span class="badge bg-light text-dark border">{{ listing.get_property_type_display }}</span>
+            </div>
+
+            <div class="d-flex align-items-center gap-2">
+                <!-- Wishlist Toggle -->
+                <button class="btn btn-outline-dark btn-sm rounded-pill px-3 wishlist-toggle-btn {% if is_wishlisted %}active{% endif %}"
+                        data-listing-id="{{ listing.id }}">
+                    <i class="bi {% if is_wishlisted %}bi-heart-fill text-danger{% else %}bi-heart{% endif %} me-1"></i>
+                    {% if is_wishlisted %}Saved{% else %}Save{% endif %}
+                </button>
+
+                {% if user.is_authenticated and user == listing.host %}
+                    <a href="{% url 'listings:edit' slug=listing.slug %}" class="btn btn-outline-secondary btn-sm rounded-pill px-3">
+                        <i class="bi bi-pencil me-1"></i> Edit Listing
+                    </a>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <!-- Image Gallery Grid -->
+    <div class="gallery-grid">
+        {% if images %}
+            {% for img in images|slice:":5" %}
+            <div class="gallery-item">
+                <img src="{{ img.image.url }}" alt="{{ listing.title }}" loading="lazy">
+            </div>
+            {% endfor %}
+            <!-- Fill up to 5 slots if fewer images -->
+            {% if images|length == 1 %}
+                <div class="gallery-item"><img src="https://images.unsplash.com/photo-1512917774080-9991f1c4c750?w=700" alt="Placeholder"></div>
+                <div class="gallery-item"><img src="https://images.unsplash.com/photo-1613977257363-707ba9348227?w=700" alt="Placeholder"></div>
+                <div class="gallery-item"><img src="https://images.unsplash.com/photo-1584622650111-993a426fbf0a?w=700" alt="Placeholder"></div>
+                <div class="gallery-item"><img src="https://images.unsplash.com/photo-1590490360182-c33d57733427?w=700" alt="Placeholder"></div>
+            {% endif %}
+        {% else %}
+            <div class="gallery-item">
+                <img src="https://images.unsplash.com/photo-1566073771259-6a8506099945?w=1200" alt="{{ listing.title }}">
+            </div>
+            <div class="gallery-item"><img src="https://images.unsplash.com/photo-1512917774080-9991f1c4c750?w=700" alt="Placeholder"></div>
+            <div class="gallery-item"><img src="https://images.unsplash.com/photo-1613977257363-707ba9348227?w=700" alt="Placeholder"></div>
+            <div class="gallery-item"><img src="https://images.unsplash.com/photo-1584622650111-993a426fbf0a?w=700" alt="Placeholder"></div>
+            <div class="gallery-item"><img src="https://images.unsplash.com/photo-1590490360182-c33d57733427?w=700" alt="Placeholder"></div>
+        {% endif %}
+    </div>
+
+    <!-- Main Content Row -->
+    <div class="row g-5">
+
+        <!-- Left Column: Details, Amenities, Host, Reviews -->
+        <div class="col-lg-8">
+
+            <!-- Capacity Badges -->
+            <div class="d-flex flex-wrap gap-4 py-3 border-bottom text-muted">
+                <div><i class="bi bi-people fs-5 text-dark me-1"></i> {{ listing.max_guests }} guest{{ listing.max_guests|pluralize }}</div>
+                <div><i class="bi bi-door-closed fs-5 text-dark me-1"></i> {{ listing.bedrooms }} bedroom{{ listing.bedrooms|pluralize }}</div>
+                <div><i class="bi bi-layout-split fs-5 text-dark me-1"></i> {{ listing.beds }} bed{{ listing.beds|pluralize }}</div>
+                <div><i class="bi bi-droplet fs-5 text-dark me-1"></i> {{ listing.bathrooms }} bath{{ listing.bathrooms|pluralize }}</div>
+            </div>
+
+            <!-- Host Information Box -->
+            <div class="host-badge-card my-4">
+                {% if listing.host.avatar_url %}
+                    <img src="{{ listing.host.avatar_url }}" alt="{{ listing.host.username }}" class="host-avatar-lg">
+                {% else %}
+                    <div class="host-avatar-lg bg-dark text-white d-flex align-items-center justify-content-center fs-3">
+                        {{ listing.host.first_name|first|default:listing.host.username|first|upper }}
+                    </div>
+                {% endif %}
+                <div>
+                    <h5 class="fw-bold mb-1">Hosted by {{ listing.host.full_name }}</h5>
+                    <p class="text-muted small mb-0">
+                        {% if listing.host.bio %}{{ listing.host.bio|truncatewords:20 }}{% else %}Dedicated ApnaStay Host committed to offering memorable stays.{% endif %}
+                    </p>
+                </div>
+            </div>
+
+            <!-- Description -->
+            <div class="py-4 border-bottom">
+                <h4 class="fw-bold mb-3">About this accommodation</h4>
+                <div class="text-secondary lh-lg" style="white-space: pre-line;">
+                    {{ listing.description }}
+                </div>
+            </div>
+
+            <!-- Amenities -->
+            <div class="py-4 border-bottom">
+                <h4 class="fw-bold mb-3">What this place offers</h4>
+                {% if amenities %}
+                <div class="amenities-grid">
+                    {% for a in amenities %}
+                    <div class="amenity-item">
+                        <i class="bi {{ a.icon }}"></i>
+                        <span>{{ a.name }}</span>
+                    </div>
+                    {% endfor %}
+                </div>
+                {% else %}
+                <p class="text-muted">Standard living essentials and comfort provided.</p>
+                {% endif %}
+            </div>
+
+            <!-- Guest Reviews Section -->
+            <div class="py-4 border-bottom">
+                <div class="d-flex justify-content-between align-items-center mb-4">
+                    <div>
+                        <h4 class="fw-bold mb-1">
+                            <i class="bi bi-star-fill text-warning me-2"></i>
+                            {% if listing.average_rating > 0 %}
+                                {{ listing.average_rating }} · {{ listing.review_count }} review{{ listing.review_count|pluralize }}
+                            {% else %}
+                                No reviews yet
+                            {% endif %}
+                        </h4>
+                        <span class="text-muted small">Only guests with verified completed stays can leave reviews.</span>
+                    </div>
+
+                    {% if can_user_review and eligible_booking %}
+                        <a href="{% url 'reviews:create' booking_id=eligible_booking.booking_id %}" class="btn btn-outline-coral rounded-pill">
+                            <i class="bi bi-pencil-square me-1"></i> Leave a Review
+                        </a>
+                    {% endif %}
+                </div>
+
+                {% if reviews %}
+                    <div class="row g-4">
+                        {% for r in reviews %}
+                        <div class="col-md-6">
+                            <div class="review-card h-100">
+                                <div class="d-flex align-items-center gap-3 mb-2">
+                                    {% if r.user.avatar_url %}
+                                        <img src="{{ r.user.avatar_url }}" alt="{{ r.user.username }}" class="reviewer-avatar">
+                                    {% else %}
+                                        <div class="reviewer-avatar bg-secondary text-white d-flex align-items-center justify-content-center fw-bold">
+                                            {{ r.user.first_name|first|default:r.user.username|first|upper }}
+                                        </div>
+                                    {% endif %}
+                                    <div>
+                                        <div class="fw-bold">{{ r.user.full_name }}</div>
+                                        <div class="text-muted" style="font-size: 0.8rem;">{{ r.created_at|date:"F Y" }}</div>
+                                    </div>
+                                    <div class="ms-auto text-warning small">
+                                        {% for i in "12345"|make_list %}
+                                            {% if forloop.counter <= r.rating %}
+                                                <i class="bi bi-star-fill"></i>
+                                            {% else %}
+                                                <i class="bi bi-star"></i>
+                                            {% endif %}
+                                        {% endfor %}
+                                    </div>
+                                </div>
+                                <p class="text-secondary small mb-0">{{ r.comment }}</p>
+                                {% if user == r.user %}
+                                    <div class="mt-2 text-end">
+                                        <a href="{% url 'reviews:edit' review_id=r.id %}" class="small text-muted me-2">Edit</a>
+                                    </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                {% else %}
+                    <div class="p-4 bg-light rounded-4 text-center">
+                        <i class="bi bi-chat-heart fs-2 text-muted mb-2 d-block"></i>
+                        <p class="text-muted mb-0">Be the first guest to stay and leave a review for this property!</p>
+                    </div>
+                {% endif %}
+            </div>
+
+            <!-- Location Section -->
+            <div class="py-4">
+                <h4 class="fw-bold mb-2">Where you'll be</h4>
+                <div class="text-muted mb-3">{{ listing.address }}, {{ listing.city }}, {{ listing.state }}, {{ listing.country }}</div>
+                <div class="p-4 bg-light rounded-4 border text-center text-muted">
+                    <i class="bi bi-map fs-1 text-coral mb-2 d-block"></i>
+                    <strong>{{ listing.city }}, {{ listing.state }}</strong>
+                    <div class="small">Accurate neighborhood details and arrival guide are shared upon booking confirmation.</div>
+                </div>
+            </div>
+
+        </div>
+
+        <!-- Right Column: Sticky Booking Widget -->
+        <div class="col-lg-4">
+            <div class="booking-widget-card" id="booking-widget-container" data-slug="{{ listing.slug }}">
+
+                <!-- Price Per Night Header -->
+                <div class="booking-price-header">
+                    <div>
+                        <span class="fs-3 fw-bold">₹{{ listing.price_per_night|floatformat:0|intcomma }}</span>
+                        <span class="text-muted"> / night</span>
+                    </div>
+                    <div class="small fw-semibold">
+                        <i class="bi bi-star-fill text-warning"></i>
+                        {% if listing.average_rating > 0 %}{{ listing.average_rating }}{% else %}New{% endif %}
+                    </div>
+                </div>
+
+                <!-- Booking Form -->
+                {% if user.is_authenticated and user == listing.host %}
+                    <div class="alert alert-warning small">
+                        <i class="bi bi-info-circle me-1"></i> You are the host of this property.
+                    </div>
+                {% else %}
+                    <form action="{% url 'bookings:create' slug=listing.slug %}" method="POST" id="bookingForm">
+                        {% csrf_token %}
+
+                        <!-- Dates Selector Box -->
+                        <div class="booking-dates-box">
+                            <div class="row g-0">
+                                <div class="col-6 booking-date-col border-end">
+                                    <label class="search-label">CHECK-IN</label>
+                                    <input type="date" name="check_in" id="booking_check_in" class="form-control form-control-sm border-0 p-0"
+                                           min="{% now 'Y-m-d' %}" required>
+                                </div>
+                                <div class="col-6 booking-date-col">
+                                    <label class="search-label">CHECKOUT</label>
+                                    <input type="date" name="check_out" id="booking_check_out" class="form-control form-control-sm border-0 p-0"
+                                           required>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Guests Select -->
+                        <div class="mb-3">
+                            <label class="search-label mb-1">GUESTS</label>
+                            <select name="guests_count" id="booking_guests_count" class="form-select form-select-sm">
+                                {% for g in "12345678"|make_list %}
+                                    {% if forloop.counter <= listing.max_guests %}
+                                        <option value="{{ forloop.counter }}">{{ forloop.counter }} guest{% if forloop.counter > 1 %}s{% endif %}</option>
+                                    {% endif %}
+                                {% endfor %}
+                            </select>
+                        </div>
+
+                        <!-- Dynamic Live Price Breakdown -->
+                        <div id="live-price-breakdown" class="mb-3">
+                            <div class="text-muted small text-center py-2">
+                                Select dates to view total trip pricing
+                            </div>
+                        </div>
+
+                        <!-- Reserve Button -->
+                        {% if user.is_authenticated %}
+                            <button type="submit" id="book-submit-btn" class="btn btn-coral w-100 py-3 fw-bold fs-6">
+                                Reserve Now
+                            </button>
+                        {% else %}
+                            <a href="{% url 'accounts:login' %}?next={{ request.path }}" class="btn btn-coral w-100 py-3 fw-bold fs-6">
+                                Log in to Reserve
+                            </a>
+                        {% endif %}
+
+                        <div class="text-center text-muted small mt-2">
+                            <i class="bi bi-shield-check"></i> Pay at property · Free cancellation prior to check-in
+                        </div>
+                    </form>
+                {% endif %}
+
+            </div>
+        </div>
+
+    </div>
+
+    <!-- Similar Listings -->
+    {% if similar_listings %}
+    <div class="mt-5 pt-4 border-top">
+        <h4 class="fw-bold mb-4">Other Stays in {{ listing.city }}</h4>
+        <div class="row g-4">
+            {% for sim in similar_listings %}
+            <div class="col-12 col-sm-6 col-lg-4">
+                <div class="property-card h-100">
+                    <div class="property-img-wrapper" style="aspect-ratio: 16/10;">
+                        {% if sim.cover_image and sim.cover_image.image %}
+                            <img src="{{ sim.cover_image.image.url }}" alt="{{ sim.title }}" class="property-img">
+                        {% else %}
+                            <img src="https://images.unsplash.com/photo-1566073771259-6a8506099945?w=500" alt="{{ sim.title }}" class="property-img">
+                        {% endif %}
+                    </div>
+                    <a href="{% url 'listings:detail' slug=sim.slug %}" class="text-decoration-none">
+                        <div class="d-flex justify-content-between align-items-baseline">
+                            <h6 class="fw-bold text-dark text-truncate me-2">{{ sim.title }}</h6>
+                            <span class="small text-muted"><i class="bi bi-star-fill text-warning"></i> {{ sim.average_rating }}</span>
+                        </div>
+                        <div class="property-location">{{ sim.city }}</div>
+                        <div class="property-price">₹{{ sim.price_per_night|floatformat:0|intcomma }} / night</div>
+                    </a>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+    {% endif %}
+
+</div>
+{% endblock %}

@@ -1,0 +1,92 @@
+{% extends 'base.html' %}
+
+{% block title %}Help Centre - ApnaStay{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-9">
+            <div class="text-center mb-5">
+                <span class="badge bg-danger-subtle text-danger px-3 py-2 rounded-pill fw-semibold mb-2">FAQs & Guides</span>
+                <h1 class="fw-bold">Frequently Asked Questions</h1>
+                <p class="text-muted">Find answers to common questions about booking, cancellations, hosting, and payments on ApnaStay.</p>
+            </div>
+
+            <div class="accordion accordion-flush shadow-sm rounded-4 border p-3 bg-white" id="helpAccordion">
+
+                <div class="accordion-item">
+                    <h2 class="accordion-header">
+                        <button class="accordion-button fw-bold" type="button" data-bs-toggle="collapse" data-bs-target="#help1">
+                            How do I book a stay on ApnaStay?
+                        </button>
+                    </h2>
+                    <div id="help1" class="accordion-collapse collapse show" data-bs-parent="#helpAccordion">
+                        <div class="accordion-body text-muted">
+                            Search for your desired destination on the homepage or explore page. Select your check-in and check-out dates and guest count. Once you choose an available property, click "Reserve Now", review your booking summary, and confirm. Your reservation ID will be generated instantly.
+                        </div>
+                    </div>
+                </div>
+
+                <div class="accordion-item">
+                    <h2 class="accordion-header">
+                        <button class="accordion-button collapsed fw-bold" type="button" data-bs-toggle="collapse" data-bs-target="#help2">
+                            How does payment work?
+                        </button>
+                    </h2>
+                    <div id="help2" class="accordion-collapse collapse" data-bs-parent="#helpAccordion">
+                        <div class="accordion-body text-muted">
+                            For this version, ApnaStay operates on a "Pay at property upon check-in" model. You will receive a full price breakdown showing the accommodation subtotal and platform fee, and payment is settled directly with your host upon arrival.
+                        </div>
+                    </div>
+                </div>
+
+                <div class="accordion-item">
+                    <h2 class="accordion-header">
+                        <button class="accordion-button collapsed fw-bold" type="button" data-bs-toggle="collapse" data-bs-target="#help3">
+                            Can I cancel my reservation?
+                        </button>
+                    </h2>
+                    <div id="help3" class="accordion-collapse collapse" data-bs-parent="#helpAccordion">
+                        <div class="accordion-body text-muted">
+                            Yes! You can cancel any upcoming booking before the check-in date directly from your Guest Dashboard ("My Trips"). Once cancelled, the dates are immediately released in our database for other travellers.
+                        </div>
+                    </div>
+                </div>
+
+                <div class="accordion-item">
+                    <h2 class="accordion-header">
+                        <button class="accordion-button collapsed fw-bold" type="button" data-bs-toggle="collapse" data-bs-target="#help4">
+                            How do I become a host and list my property?
+                        </button>
+                    </h2>
+                    <div id="help4" class="accordion-collapse collapse" data-bs-parent="#helpAccordion">
+                        <div class="accordion-body text-muted">
+                            Any registered user can become a host with a single click by selecting "Become a Host" in the navigation bar. Fill out your property title, description, address, price per night, amenities, and upload property photos. Your listing will immediately be published to travellers across India.
+                        </div>
+                    </div>
+                </div>
+
+                <div class="accordion-item">
+                    <h2 class="accordion-header">
+                        <button class="accordion-button collapsed fw-bold" type="button" data-bs-toggle="collapse" data-bs-target="#help5">
+                            Who is eligible to leave a review?
+                        </button>
+                    </h2>
+                    <div id="help5" class="accordion-collapse collapse" data-bs-parent="#helpAccordion">
+                        <div class="accordion-body text-muted">
+                            To ensure 100% authentic feedback, only guests who have completed a stay at the property can submit a review and 1-5 star rating. Hosts cannot review their own properties, and each completed stay allows exactly one review.
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+
+            <div class="text-center mt-5">
+                <p class="text-muted">Still have questions? Our support team is ready to assist you.</p>
+                <a href="{% url 'core:contact' %}" class="btn btn-outline-coral px-4">Contact ApnaStay Support</a>
+            </div>
+
+        </div>
+    </div>
+</div>
+{% endblock %}

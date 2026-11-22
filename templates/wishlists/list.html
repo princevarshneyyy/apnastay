@@ -1,0 +1,72 @@
+{% extends 'base.html' %}
+{% load humanize %}
+
+{% block title %}My Wishlist - ApnaStay{% endblock %}
+
+{% block content %}
+<div class="container-fluid px-lg-5 py-5">
+
+    <div class="d-flex align-items-center justify-content-between mb-4 pb-3 border-bottom">
+        <div>
+            <h2 class="fw-bold mb-1">Your Saved Wishlist</h2>
+            <p class="text-muted mb-0">Keep track of places you want to visit across India.</p>
+        </div>
+        <a href="{% url 'listings:list' %}" class="btn btn-outline-dark rounded-pill px-4">
+            <i class="bi bi-search me-1"></i> Explore More Stays
+        </a>
+    </div>
+
+    {% if wishlist_items %}
+        <div class="row g-4">
+            {% for item in wishlist_items %}
+            <div class="col-12 col-sm-6 col-lg-4 col-xl-3">
+                <div class="property-card h-100">
+                    <div class="property-img-wrapper">
+                        {% if item.listing.cover_image and item.listing.cover_image.image %}
+                            <img src="{{ item.listing.cover_image.image.url }}" alt="{{ item.listing.title }}" class="property-img" loading="lazy">
+                        {% else %}
+                            <img src="https://images.unsplash.com/photo-1566073771259-6a8506099945?w=600" alt="{{ item.listing.title }}" class="property-img" loading="lazy">
+                        {% endif %}
+
+                        <!-- Wishlist Toggle (Active by definition on this page) -->
+                        <button class="wishlist-heart-btn wishlist-toggle-btn active"
+                                data-listing-id="{{ item.listing.id }}" title="Remove from Wishlist">
+                            <i class="bi bi-heart-fill"></i>
+                        </button>
+
+                        <span class="property-badge-type">{{ item.listing.get_property_type_display }}</span>
+                    </div>
+
+                    <a href="{% url 'listings:detail' slug=item.listing.slug %}" class="text-decoration-none">
+                        <div class="d-flex justify-content-between align-items-baseline">
+                            <h5 class="property-title text-truncate me-2" title="{{ item.listing.title }}">{{ item.listing.title }}</h5>
+                            <div class="property-rating">
+                                <i class="bi bi-star-fill"></i>
+                                <span>{% if item.listing.average_rating > 0 %}{{ item.listing.average_rating }}{% else %}New{% endif %}</span>
+                            </div>
+                        </div>
+                        <div class="property-location">{{ item.listing.city }}, {{ item.listing.state }}</div>
+                        <div class="text-muted small mb-1">{{ item.listing.max_guests }} guests · {{ item.listing.bedrooms }} bed</div>
+                        <div class="property-price">
+                            ₹{{ item.listing.price_per_night|floatformat:0|intcomma }} <span class="price-subtext">/ night</span>
+                        </div>
+                    </a>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    {% else %}
+        <div class="text-center py-5 my-5 bg-light rounded-4">
+            <i class="bi bi-heart fs-1 text-danger mb-3 d-block"></i>
+            <h4 class="fw-bold">Your wishlist is empty</h4>
+            <p class="text-muted mx-auto mb-4" style="max-width: 450px;">
+                As you search properties, tap the heart icon on any listing to save your favourites here.
+            </p>
+            <a href="{% url 'listings:list' %}" class="btn btn-coral px-4">
+                Explore Stays
+            </a>
+        </div>
+    {% endif %}
+
+</div>
+{% endblock %}

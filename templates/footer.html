@@ -1,0 +1,85 @@
+<footer class="apna-footer">
+    <div class="container-fluid px-lg-5">
+        <div class="row g-4 pb-4">
+            <!-- Brand & Mission -->
+            <div class="col-lg-4 col-md-6">
+                <div class="brand-logo mb-2">
+                    <i class="bi bi-house-door-fill"></i>
+                    <span>ApnaStay</span>
+                </div>
+                <p class="text-muted small mb-3">
+                    <em>"Apna Stay, Apni Choice."</em><br>
+                    India's friendly accommodation marketplace connecting travellers with authentic stays, villas, homestays, and unique getaways across incredible Indian destinations.
+                </p>
+                <div class="d-flex gap-3 fs-5">
+                    <a href="https://github.com" target="_blank" class="text-muted"><i class="bi bi-github"></i></a>
+                    <a href="https://instagram.com" target="_blank" class="text-muted"><i class="bi bi-instagram"></i></a>
+                    <a href="https://twitter.com" target="_blank" class="text-muted"><i class="bi bi-twitter-x"></i></a>
+                    <a href="https://linkedin.com" target="_blank" class="text-muted"><i class="bi bi-linkedin"></i></a>
+                </div>
+            </div>
+
+            <!-- Stays & Destinations -->
+            <div class="col-lg-2 col-md-3 col-6">
+                <h6>Explore Stays</h6>
+                <ul class="text-muted">
+                    <li><a href="{% url 'listings:list' %}?category=villa">Luxury Villas</a></li>
+                    <li><a href="{% url 'listings:list' %}?category=apartment">City Apartments</a></li>
+                    <li><a href="{% url 'listings:list' %}?category=homestay">Cozy Homestays</a></li>
+                    <li><a href="{% url 'listings:list' %}?category=resort">Holiday Resorts</a></li>
+                    <li><a href="{% url 'listings:list' %}?category=farmhouse">Scenic Farmhouses</a></li>
+                </ul>
+            </div>
+
+            <!-- Popular Destinations -->
+            <div class="col-lg-2 col-md-3 col-6">
+                <h6>Top Destinations</h6>
+                <ul class="text-muted">
+                    <li><a href="{% url 'listings:list' %}?destination=Goa">Goa Beaches</a></li>
+                    <li><a href="{% url 'listings:list' %}?destination=Manali">Manali Hills</a></li>
+                    <li><a href="{% url 'listings:list' %}?destination=Jaipur">Jaipur Heritage</a></li>
+                    <li><a href="{% url 'listings:list' %}?destination=Udaipur">Udaipur Lakes</a></li>
+                    <li><a href="{% url 'listings:list' %}?destination=Kerala">Kerala Backwaters</a></li>
+                </ul>
+            </div>
+
+            <!-- Hosting -->
+            <div class="col-lg-2 col-md-3 col-6">
+                <h6>Hosting</h6>
+                <ul class="text-muted">
+                    <li><a href="{% url 'accounts:become_host' %}">Become a Host</a></li>
+                    <li><a href="{% url 'accounts:host_dashboard' %}">Host Dashboard</a></li>
+                    <li><a href="{% url 'listings:create' %}">List Your Property</a></li>
+                    <li><a href="{% url 'core:help' %}">Hosting Resources</a></li>
+                </ul>
+            </div>
+
+            <!-- Support & Legal -->
+            <div class="col-lg-2 col-md-3 col-6">
+                <h6>Support & Legal</h6>
+                <ul class="text-muted">
+                    <li><a href="{% url 'core:help' %}">Help Centre</a></li>
+                    <li><a href="{% url 'core:contact' %}">Contact Us</a></li>
+                    <li><a href="{% url 'core:about' %}">About ApnaStay</a></li>
+                    <li><a href="{% url 'core:terms' %}">Terms of Service</a></li>
+                    <li><a href="{% url 'core:privacy' %}">Privacy Policy</a></li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- Bottom bar -->
+        <div class="d-flex flex-column flex-md-row align-items-center justify-content-between pt-3 border-top border-light text-muted small">
+            <div>
+                © 2026 ApnaStay Marketplace Inc. All rights reserved. Built with Python & Django.
+            </div>
+            <div class="mt-2 mt-md-0 d-flex align-items-center gap-3">
+                <span class="badge bg-light text-secondary border">
+                    <i class="bi bi-database me-1"></i> Active DB: <strong class="text-dark">{{ ACTIVE_DB|upper }}</strong>
+                </span>
+                <a href="{% url 'core:health_check' %}" class="text-muted" target="_blank">
+                    <i class="bi bi-activity text-success"></i> Health API
+                </a>
+            </div>
+        </div>
+    </div>
+</footer>

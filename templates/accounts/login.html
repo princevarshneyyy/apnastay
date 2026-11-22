@@ -1,0 +1,94 @@
+{% extends 'base.html' %}
+
+{% block title %}Log In - ApnaStay{% endblock %}
+
+{% block content %}
+<div class="container py-5 my-4">
+    <div class="row justify-content-center">
+        <div class="col-12 col-md-8 col-lg-5">
+
+            <div class="card border-0 shadow rounded-4 p-4 p-sm-5 bg-white">
+                <div class="text-center mb-4">
+                    <div class="brand-logo justify-content-center fs-2 mb-2">
+                        <i class="bi bi-house-door-fill"></i>
+                        <span>ApnaStay</span>
+                    </div>
+                    <h4 class="fw-bold">Welcome back</h4>
+                    <p class="text-muted small">Log in to manage your bookings, wishlist, or property listings.</p>
+                </div>
+
+                <form method="POST" action="{% url 'accounts:login' %}{% if request.GET.next %}?next={{ request.GET.next }}{% endif %}">
+                    {% csrf_token %}
+
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold">Username or Email</label>
+                        {{ form.username_or_email }}
+                        {% if form.username_or_email.errors %}
+                            <div class="text-danger small mt-1">{{ form.username_or_email.errors }}</div>
+                        {% endif %}
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold">Password</label>
+                        {{ form.password }}
+                        {% if form.password.errors %}
+                            <div class="text-danger small mt-1">{{ form.password.errors }}</div>
+                        {% endif %}
+                    </div>
+
+                    <div class="d-flex justify-content-between align-items-center mb-4">
+                        <div class="form-check">
+                            {{ form.remember_me }}
+                            <label class="form-check-label small text-muted" for="{{ form.remember_me.id_for_label }}">
+                                Remember me
+                            </label>
+                        </div>
+                        <a href="{% url 'core:help' %}" class="small text-muted">Need help?</a>
+                    </div>
+
+                    <button type="submit" class="btn btn-coral w-100 py-2 fs-6 fw-bold mb-3">
+                        Log in
+                    </button>
+                </form>
+
+                <div class="text-center mt-3 pt-3 border-top">
+                    <span class="text-muted small">Don't have an ApnaStay account?</span>
+                    <a href="{% url 'accounts:register' %}" class="fw-bold text-coral ms-1 text-decoration-none">Sign up</a>
+                </div>
+
+                <!-- Demo Credentials Helper for College Viva / Testing -->
+                <div class="mt-4 p-3 bg-light rounded-3 border">
+                    <div class="small fw-bold text-dark mb-2 d-flex align-items-center justify-content-between">
+                        <span><i class="bi bi-person-badge me-1"></i> Quick Demo Login</span>
+                        <span class="badge bg-secondary-subtle text-secondary" style="font-size: 0.7rem;">Viva Helper</span>
+                    </div>
+                    <div class="d-flex flex-wrap gap-2">
+                        <button type="button" class="btn btn-sm btn-outline-secondary rounded-pill fill-demo-btn" data-user="guest1" data-pass="guest123">
+                            <i class="bi bi-person me-1"></i> Guest (guest1)
+                        </button>
+                        <button type="button" class="btn btn-sm btn-outline-secondary rounded-pill fill-demo-btn" data-user="host1" data-pass="host123">
+                            <i class="bi bi-house me-1"></i> Host (host1)
+                        </button>
+                        <button type="button" class="btn btn-sm btn-outline-secondary rounded-pill fill-demo-btn" data-user="admin" data-pass="admin123">
+                            <i class="bi bi-shield me-1"></i> Admin (admin)
+                        </button>
+                    </div>
+                </div>
+
+            </div>
+
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.querySelectorAll('.fill-demo-btn').forEach(btn => {
+    btn.addEventListener('click', function() {
+        document.getElementById('id_username_or_email').value = this.dataset.user;
+        document.getElementById('id_password').value = this.dataset.pass;
+    });
+});
+</script>
+{% endblock %}
